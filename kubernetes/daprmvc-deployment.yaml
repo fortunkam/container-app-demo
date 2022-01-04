@@ -40,6 +40,3 @@ spec:
         ports:
         - containerPort: 5000
         imagePullPolicy: Always
-        env:
-          - name: STORAGE_CONNECTIONSTRING
-            value: DefaultEndpointsProtocol=https;AccountName=mfdaprstore01;AccountKey=1ZMCzsuKyXhKqXjtXTig1R8C3kw4Xq/jJcn65Gn0jJbLnhWZPDmQa60Rg4OsSDfPWRYF0Epnht1QsvhSuS/uDA==;EndpointSuffix=core.windows.net
