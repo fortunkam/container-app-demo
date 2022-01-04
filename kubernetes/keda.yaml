@@ -4,7 +4,7 @@ metadata:
   name: azure-queue-auth
 spec:
   secretTargetRef:                          # Optional.
-  - parameter: connectionString           # Required - Defined by the scale trigger
+  - parameter: connection           # Required - Defined by the scale trigger
     name: keda-secrets           # Required.
     key: azure-storage-connectionstring   # Required.
 ---
@@ -16,6 +16,11 @@ metadata:
 spec:
   scaleTargetRef:
     name: daprmvc
+  pollingInterval:  30                               # Optional. Default: 30 seconds
+  cooldownPeriod:   300                              # Optional. Default: 300 seconds
+  idleReplicaCount: 1                                # Optional. Must be less than minReplicaCount
+  minReplicaCount:  2                                # Optional. Default: 0
+  maxReplicaCount:  100                              # Optional. Default: 100
   triggers:
   - type: azure-queue
     metadata:
@@ -28,7 +33,7 @@ spec:
       # or authenticationRef as defined below
       #
       # Optional
-      queueLength: "5" # default 5
+      queueLength: "2" # default 5
       cloud: AzurePublicCloud
     authenticationRef:
         name: azure-queue-auth # authenticationRef would need either podIdentity or define a connection parameter
