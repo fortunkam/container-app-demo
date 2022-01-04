@@ -1,0 +1,32 @@
+# apiVersion: keda.sh/v1alpha1
+# kind: TriggerAuthentication
+# metadata:
+#   name: azure-queue-auth
+# spec:
+#   podIdentity:
+#     provider: azure
+# ---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: azure-queue-scaledobject
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: daprmvc
+  triggers:
+  - type: azure-queue
+    metadata:
+      # Required
+      queueName: daprtest
+      # Optional, required when pod identity is used
+      accountName: mfdaprstore01
+      # Optional: connection OR authenticationRef that defines connection
+      connectionFromEnv: STORAGE_CONNECTIONSTRING # Default: AzureWebJobsStorage. Reference to a connection string in deployment
+      # or authenticationRef as defined below
+      #
+      # Optional
+      queueLength: "5" # default 5
+      cloud: AzurePublicCloud
+    # authenticationRef:
+    #     name: azure-queue-auth # authenticationRef would need either podIdentity or define a connection parameter

@@ -23,6 +23,7 @@ namespace CheckoutService.controller
             using var client = new DaprClientBuilder().Build();
             await client.InvokeBindingAsync(BINDING_NAME, BINDING_OPERATION, $"Input Binding 1 to Output Binding 1: {orderId}");
 
+            Thread.Sleep(2000);
             return "CID" + orderId;
         }
 
