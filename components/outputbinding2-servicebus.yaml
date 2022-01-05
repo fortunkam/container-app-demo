@@ -1,0 +1,19 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: outputbinding2
+  namespace: default
+spec:
+  type: bindings.azure.servicebusqueues
+  version: v1
+  metadata:
+  - name: connectionString
+    secretKeyRef:
+      name: dapr-secrets
+      key: service-bus-connection-string
+  - name: queueName
+    value: daproutput
+  - name: ttlInSeconds
+    value: 60
+auth:
+  secretStore: dapr-secrets

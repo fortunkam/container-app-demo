@@ -1,0 +1,25 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: inputbinding1
+  namespace: default
+spec:
+  type: bindings.azure.storagequeues
+  version: v1
+  metadata:
+  - name: storageAccount
+    secretKeyRef:
+      name: dapr-secrets
+      key: storage-account-name
+  - name: storageAccessKey
+    secretKeyRef:
+      name: dapr-secrets
+      key: storage-account-key
+  - name: queue
+    value: "daprtest"
+  - name: ttlInSeconds
+    value: "60"
+  - name: decodeBase64
+    value: "false"
+auth:
+  secretStore: dapr-secrets

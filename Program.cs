@@ -1,27 +1,46 @@
-var builder = WebApplication.CreateBuilder(args);
+using Dapr.Client;
+using Microsoft.AspNetCore.Mvc;
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-  //  app.UseHsts();
-}
+string BINDING_OPERATION = "create";
 
-//app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.MapPost("/inputbinding1", async ([FromBody]int orderId)=> {
+    Console.WriteLine("Input Binding 1: Received Message: " + orderId);
 
-app.UseRouting();
+    string BINDING_NAME = "outputbinding1";
 
-app.UseAuthorization();
+    using var client = new DaprClientBuilder().Build();
+    await client.InvokeBindingAsync(BINDING_NAME, BINDING_OPERATION, $"Input Binding 1 to Output Binding 1: {orderId}");
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    Thread.Sleep(2000);
+    return "CID" + orderId;
+});
+
+app.MapPost("/inputbinding2", async ([FromBody]int orderId)=> {
+    Console.WriteLine("Input Binding 2: Received Message: " + orderId);
+
+    string BINDING_NAME = "outputbinding2";
+
+    using var client = new DaprClientBuilder().Build();
+    await client.InvokeBindingAsync(BINDING_NAME, BINDING_OPERATION, $"Input Binding 2 to Output Binding 2: {orderId}");
+
+    return "CID" + orderId;
+});
+
+app.MapGet("/", ()=> {
+    return "Hello World";
+});
+
+app.MapGet("/getSecret", async ()=> {
+    string SECRET_STORE_NAME = "dapr-secrets";
+    string K8S_SECRET_NAME = "dapr-secrets";
+    using var client = new DaprClientBuilder().Build();
+    var secret = await client.GetSecretAsync(SECRET_STORE_NAME, K8S_SECRET_NAME);
+    return secret["secret-type"];
+});
+
 
 app.Run();

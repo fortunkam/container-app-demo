@@ -397,4 +397,5 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
-/components/*
+/kubernetes/secrets/*
+components/local-secrets.json
