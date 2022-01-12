@@ -34,13 +34,18 @@ app.MapGet("/", ()=> {
     return "Hello World";
 });
 
-app.MapGet("/getSecret", async ()=> {
-    string SECRET_STORE_NAME = "dapr-secrets";
-    string K8S_SECRET_NAME = "dapr-secrets";
+app.MapGet("/store", async ([FromQuery]string key, [FromQuery]string value) => {
     using var client = new DaprClientBuilder().Build();
-    var secret = await client.GetSecretAsync(SECRET_STORE_NAME, K8S_SECRET_NAME);
-    return secret["secret-type"];
+    await client.SaveStateAsync("statestore",key,value);
 });
+
+// app.MapGet("/getSecret", async ()=> {
+//     string SECRET_STORE_NAME = "dapr-secrets";
+//     string K8S_SECRET_NAME = "dapr-secrets";
+//     using var client = new DaprClientBuilder().Build();
+//     var secret = await client.GetSecretAsync(SECRET_STORE_NAME, K8S_SECRET_NAME);
+//     return secret["secret-type"];
+// });
 
 
 app.Run();

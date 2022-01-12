@@ -1,25 +1,21 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: inputbinding1
+  name: statestore
   namespace: default
 spec:
-  type: bindings.azure.storagequeues
+  type: state.azure.blobstorage
   version: v1
   metadata:
-  - name: storageAccount
+  - name: accountName
     secretKeyRef:
       name: dapr-secrets
       key: storage-account-name
-  - name: storageAccessKey
+  - name: accountKey
     secretKeyRef:
       name: dapr-secrets
       key: storage-account-key
-  - name: queue
-    value: "daprtest"
-  - name: ttlInSeconds
-    value: "60"
-  - name: decodeBase64
-    value: "false"
+  - name: containerName
+    value: "test"
 auth:
   secretStore: dapr-secrets
