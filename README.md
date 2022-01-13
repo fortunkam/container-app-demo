@@ -40,12 +40,12 @@ dapr run --log-level debug --app-id bindingtest --app-port 7037 --dapr-http-port
 
 ## Running in AKS
 
-See the [./kubernetes/deploy.md]() for details on deploying the sample on AKS.
+See the [./kubernetes/deploy.md](./kubernetes/deploy.md) for details on deploying the sample on AKS.
 
 
 ## Running in Azure Container Apps
 
-See the [./containerapp/deploy.md]() for details on deploying the sample to Azure Container Apps.
+See the [./containerapp/deploy.md](./containerapp/deploy.md) for details on deploying the sample to Azure Container Apps.
 
-(This example was put together in collaboration with Chris Reddington and you can find a similar example at his repo [https://github.com/chrisreddington/DaprExample]() )
+(This example was put together in collaboration with Chris Reddington and you can find a similar example at his repo [https://github.com/chrisreddington/DaprExample](https://github.com/chrisreddington/DaprExample) )
 

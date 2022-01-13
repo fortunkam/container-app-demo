@@ -11,9 +11,9 @@ The AKS cluster will need to be attached to your Container Registry (az aks upda
 
 You will need to be connect your kubectl to the AKS cluster (az aks get-credentials...)
 
-The easiest way to install Dapr is using the preview extension [https://docs.microsoft.com/en-us/azure/aks/dapr]()
+The easiest way to install Dapr is using the preview extension [https://docs.microsoft.com/en-us/azure/aks/dapr](https://docs.microsoft.com/en-us/azure/aks/dapr)
 
-Setting up Keda is a bit more involved [https://keda.sh/docs/1.4/deploy/]()
+Setting up Keda is a bit more involved [https://keda.sh/docs/1.4/deploy/](https://keda.sh/docs/1.4/deploy/)
 
 Next you are going to need to create some secrets used by the components.
 
@@ -65,14 +65,14 @@ Now build the app and push to the container registry
 az acr build -r <ACRNAME> -f ../DockerFile -t "daprmvc:<VERSION>" ../
 
 ```
-You will need to update [./daprmvc-deployment.yaml]() to point at your image in your ACR
+You will need to update [./daprmvc-deployment.yaml](./daprmvc-deployment.yaml) to point at your image in your ACR
 then deploy it..
 
 ```
 kubectl apply -f daprmvc-deployment.yaml
 ```
 
-You will need to update [./keda.yaml]() to point at your storage account (the key will be loaded from secrets)
+You will need to update [./keda.yaml](./keda.yaml) to point at your storage account (the key will be loaded from secrets)
 then deploy it..
 
 ```
