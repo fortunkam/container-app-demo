@@ -15,5 +15,37 @@ It comprises of a dotnet 6 minimal API application that has the following featur
 
 Also included are a set of scripts for deploying the solution to an [Azure Container App](https://docs.microsoft.com/en-us/azure/container-apps/).  Note: Azure container apps is currently in preview.
 
+## Running Locally
+
+To run the solution locally you will need to create a local secrets file in the components folder called "local-secrets.json".  It should contain the following...
+
+```
+{
+    "dapr-secrets" : {
+        "secret-type" : "Local",
+        "storage-account-name": "<A STORAGE ACCOUNT NAME>",
+        "storage-account-key": "<A STORAGE ACCOUNT KEY",
+        "service-bus-connection-string": "<A SERVICE BUS CONNECTION STRING>"
+    }
+}
+```
+
+You can run then run the project locally (assuming you have DAPR installed) with the following command from the root of the project.
+
+```
+dapr run --log-level debug --app-id bindingtest --app-port 7037 --dapr-http-port 3602 --dapr-grpc-port 60002 --app-ssl --components-path './components'  dotnet run
+```
+
+(You might need to tweak the app port to match the port your dotnet app runs on for https)
+
+## Running in AKS
+
+See the [./kubernetes/deploy.md]() for details on deploying the sample on AKS.
+
+
+## Running in Azure Container Apps
+
+See the [./containerapp/deploy.md]() for details on deploying the sample to Azure Container Apps.
+
 (This example was put together in collaboration with Chris Reddington and you can find a similar example at his repo [https://github.com/chrisreddington/DaprExample]() )
 
