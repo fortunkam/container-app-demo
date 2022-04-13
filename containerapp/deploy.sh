@@ -3,7 +3,7 @@
 # Create a resource group
 
 RESOURCE_GROUP='container-apps-rg'
-LOCATION='canadacentral'
+LOCATION='westeurope'
 IMAGE_TAG='daprtest:v1.0'
 
 az group create -n $RESOURCE_GROUP --location $LOCATION

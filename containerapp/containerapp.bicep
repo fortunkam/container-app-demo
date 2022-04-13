@@ -8,7 +8,7 @@
 */
 param prefix string = 'cappmf'
 
-param containerAppImage string = 'daprtest:v1.3'
+param containerAppImage string = 'daprtest:v1.0'
 // Also take an object as an input for the tags parameter. This is used to cascade resource tags to all resources.
 param tags object = {}
 
@@ -30,11 +30,11 @@ var environmentName = '${prefix}-kube-env'
 var minReplicas = 1
 var maxReplicas = 2
 var acrName = '${prefix}acr'
+var acrLoginServerName = '${prefix}acr.azurecr.io'
 var containerAppServiceAppName = 'mf-container-app'
 var workspaceName = '${prefix}-log-analytics'
 var appInsightsName = '${prefix}-app-insights'
 var containerRegistryPasswordRef = 'container-registry-password'
-var secretTypeRef = 'secret-type'
 var storageAccountNameRef = 'storage-account-name'
 var storageAccountKeyRef = 'storage-account-key'
 var serviceBusConnectionStringRef = 'service-bus-connection-string'
@@ -59,7 +59,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' existing
 }
 
 // Definition for the existing Container Registry
-resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
+resource acr 'Microsoft.ContainerRegistry/registries@2021-12-01-preview' existing = {
   name: acrName
 }
 
@@ -78,13 +78,11 @@ resource servicebusauthrule 'Microsoft.ServiceBus/namespaces/AuthorizationRules@
 }
 
 // Definition for the Azure Container Apps Environment
-resource environment 'Microsoft.Web/kubeEnvironments@2021-03-01' = {
+resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' = {
   name: environmentName
   location: location
   tags: tags
   properties: {
-    type: 'managed'
-    internalLoadBalancerEnabled: false
     appLogsConfiguration: {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
@@ -92,11 +90,178 @@ resource environment 'Microsoft.Web/kubeEnvironments@2021-03-01' = {
         sharedKey: listKeys(workspace.id, workspace.apiVersion).primarySharedKey
       }
     }
-    containerAppsConfiguration: {
-      daprAIInstrumentationKey: appInsights.properties.InstrumentationKey
-    }
+    daprAIInstrumentationKey: appInsights.properties.InstrumentationKey
   }
 }
+
+resource inputbinding1 'Microsoft.App/managedEnvironments/daprComponents@2022-01-01-preview' = {
+  name: 'inputbinding1'
+  parent: environment
+  properties: {
+    componentType: 'bindings.azure.storagequeues'
+    version: 'v1'
+    metadata: [
+      {
+        name: 'storageAccount'
+        secretRef: storageAccountNameRef
+      }
+      {
+        name: 'storageAccessKey'
+        secretRef: storageAccountKeyRef
+      }
+      {
+        name: 'queue'
+        value: storageQueueInputName
+      }
+      {
+        name: 'decodeBase64'
+        value: 'false'
+      }
+    ]
+    scopes: [
+      'mf-bindings'
+    ]
+    secrets: [
+      {
+        name: storageAccountNameRef
+        value: sa.name
+      }
+      {
+        name: storageAccountKeyRef
+        value: listKeys(sa.id, sa.apiVersion).keys[0].value
+      }
+    ]
+  }
+}
+
+resource outputbinding1 'Microsoft.App/managedEnvironments/daprComponents@2022-01-01-preview' = {
+  name: 'outputbinding1'
+  parent: environment
+  properties: {
+    componentType: 'bindings.azure.storagequeues'
+    version: 'v1'
+    metadata: [
+      {
+        name: 'storageAccount'
+        secretRef: storageAccountNameRef
+      }
+      {
+        name: 'storageAccessKey'
+        secretRef: storageAccountKeyRef
+      }
+      {
+        name: 'queue'
+        value: storageQueueOutputName
+      }
+      {
+        name: 'decodeBase64'
+        value: 'false'
+      }
+    ]
+    scopes: [
+      'mf-bindings'
+    ]
+    secrets: [
+      {
+        name: storageAccountNameRef
+        value: sa.name
+      }
+      {
+        name: storageAccountKeyRef
+        value: listKeys(sa.id, sa.apiVersion).keys[0].value
+      }
+    ]
+  }
+}
+
+resource inputbinding2 'Microsoft.App/managedEnvironments/daprComponents@2022-01-01-preview' = {
+  name: 'inputbinding2'
+  parent: environment
+  properties: {
+    componentType: 'bindings.azure.servicebusqueues'
+    version: 'v1'
+    metadata: [
+      {
+        name: 'connectionString'
+        secretRef: serviceBusConnectionStringRef
+      }
+      {
+        name: 'queueName'
+        value: serviceBusInputQueueName
+      }
+    ]
+    scopes: [
+      'mf-bindings'
+    ]
+    secrets: [
+      {
+        name: serviceBusConnectionStringRef
+        value: listKeys(servicebusauthrule.id, servicebusauthrule.apiVersion).primaryConnectionString
+      }
+    ]
+  }
+}
+
+resource outputbinding2 'Microsoft.App/managedEnvironments/daprComponents@2022-01-01-preview' = {
+  name: 'outputbinding2'
+  parent: environment
+  properties: {
+    componentType: 'bindings.azure.servicebusqueues'
+    version: 'v1'
+    metadata: [
+      {
+        name: 'connectionString'
+        secretRef: serviceBusConnectionStringRef
+      }
+      {
+        name: 'queueName'
+        value: serviceBusOutputQueueName
+      }
+    ]
+    scopes: [
+      'mf-bindings'
+    ]
+    secrets: [
+      {
+        name: serviceBusConnectionStringRef
+        value: listKeys(servicebusauthrule.id, servicebusauthrule.apiVersion).primaryConnectionString
+      }
+    ]
+  }
+}
+
+resource statestore 'Microsoft.App/managedEnvironments/daprComponents@2022-01-01-preview' = {
+  name: 'statestore'
+  parent: environment
+  properties: {
+    componentType: 'state.azure.blobstorage'
+    version: 'v1'
+    metadata: [
+      {
+          name: 'accountName'
+          value: sa.name
+      }
+      {
+          name: 'accountKey'
+          secretRef: storageAccountKeyRef
+      }
+      {
+          name: 'containerName'
+          value: 'test'
+      }
+    ]
+    scopes: [
+      'mf-bindings'
+    ]
+    secrets: [
+      {
+        name: storageAccountKeyRef
+        value: listKeys(sa.id, sa.apiVersion).keys[0].value
+      }
+    ]
+  }
+}
+
 
 /* 
 Definition for the Azure Container Apps Container App.
@@ -104,56 +269,46 @@ Definition for the Azure Container Apps Container App.
 This contains the bulk of the template, including container image details, authorization details for the Azure Container Registry, scaling thresholds, secret references, DAPR configuration and KEDA configuration.
 */
 
-
-resource containerApp 'Microsoft.Web/containerapps@2021-03-01' = {
+resource containerApp 'Microsoft.App/containerapps@2022-01-01-preview' = {
   name: containerAppServiceAppName
-  kind: 'containerapps'
   tags: tags
   location: location
   properties: {
-    kubeEnvironmentId: environment.id
+    managedEnvironmentId: environment.id
     configuration: {
       activeRevisionsMode: 'single'
       ingress:{
         external:true
         targetPort:5000
       } 
+      registries: [
+        {
+          server: acrLoginServerName
+          username: acr.name
+          passwordSecretRef: containerRegistryPasswordRef
+        }
+      ]
+      dapr: {
+        enabled: true
+        appPort: 5000
+        appId: 'mf-bindings'
+      }
       secrets: [
         {
           name: containerRegistryPasswordRef
           value: listCredentials(acr.id, acr.apiVersion).passwords[0].value
         }
         {
-          name: secretTypeRef
-          value: 'container-app'
-        }
-        {
-          name: storageAccountNameRef
-          value: sa.name
-        }
-        {
-          name: storageAccountKeyRef
-          value: listKeys(sa.id, sa.apiVersion).keys[0].value
-        }
-        {
           name: serviceBusConnectionStringRef
           value: listKeys(servicebusauthrule.id, servicebusauthrule.apiVersion).primaryConnectionString
-        }
-      ]
-      registries: [
-        {
-          server: acr.properties.loginServer
-          username: acr.name
-          passwordSecretRef: containerRegistryPasswordRef
         }
       ]
     }
     template: {
       containers: [
         {
-          image: '${acr.properties.loginServer}/${containerAppImage}'
+          image: '${acrLoginServerName}/${containerAppImage}'
           name: containerAppServiceAppName
-          transport: 'auto'
         }
       ]
       scale: {
@@ -176,108 +331,6 @@ resource containerApp 'Microsoft.Web/containerapps@2021-03-01' = {
               ]
             }
           }
-        ]
-      }
-      dapr: {
-        enabled: true
-        appPort: 5000
-        appId: 'mf-bindings'
-        components: [
-          {
-            name: 'inputbinding1'
-            type: 'bindings.azure.storagequeues'
-            version: 'v1'
-            metadata: [
-              {
-                name: 'storageAccount'
-                secretRef: storageAccountNameRef
-              }
-              {
-                name: 'storageAccessKey'
-                secretRef: storageAccountKeyRef
-              }
-              {
-                name: 'queue'
-                value: storageQueueInputName
-              }
-              {
-                name: 'decodeBase64'
-                value: 'false'
-              }
-            ]
-          }
-          {
-            name: 'outputbinding1'
-            type: 'bindings.azure.storagequeues'
-            version: 'v1'
-            metadata: [
-              {
-                name: 'storageAccount'
-                secretRef: storageAccountNameRef
-              }
-              {
-                name: 'storageAccessKey'
-                secretRef: storageAccountKeyRef
-              }
-              {
-                name: 'queue'
-                value: storageQueueOutputName
-              }
-              {
-                name: 'decodeBase64'
-                value: 'false'
-              }
-            ]
-          }
-          {
-            name: 'inputbinding2'
-            type: 'bindings.azure.servicebusqueues'
-            version: 'v1'
-            metadata: [
-              {
-                name: 'connectionString'
-                secretRef: serviceBusConnectionStringRef
-              }
-              {
-                name: 'queueName'
-                value: serviceBusInputQueueName
-              }
-            ]
-          }
-          {
-            name: 'outputbinding2'
-            type: 'bindings.azure.servicebusqueues'
-            version: 'v1'
-            metadata: [
-              {
-                name: 'connectionString'
-                secretRef: serviceBusConnectionStringRef
-              }
-              {
-                name: 'queueName'
-                value: serviceBusOutputQueueName
-              }
-            ]
-          }
-          {
-            name: 'statestore'
-            type: 'state.azure.blobstorage'
-            version: 'v1'
-            metadata: [
-                {
-                    name: 'accountName'
-                    value: sa.name
-                }
-                {
-                    name: 'accountKey'
-                    secretRef: storageAccountKeyRef
-                }
-                {
-                    name: 'containerName'
-                    value: 'test'
-                }
-            ]
-        }
         ]
       }
     }
