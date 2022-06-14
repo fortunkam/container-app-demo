@@ -26,7 +26,7 @@ param location string = resourceGroup().location
   containerRegistryPasswordRef - An identifier/reference for the container registry password. This is the same concept as refs directly within DAPR/KEDA.
   serviceBusConnectionStringRef - An identifier/reference for the Service Bus Connection String. This is the same concept as refs directly within DAPR/KEDA.
 */
-var environmentName = '${prefix}-kube-env'
+
 var minReplicas = 1
 var maxReplicas = 2
 var acrName = '${prefix}acr'
@@ -77,22 +77,7 @@ resource servicebusauthrule 'Microsoft.ServiceBus/namespaces/AuthorizationRules@
   parent: servicebusnamespace
 }
 
-// Definition for the Azure Container Apps Environment
-resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' = {
-  name: environmentName
-  location: location
-  tags: tags
-  properties: {
-    appLogsConfiguration: {
-      destination: 'log-analytics'
-      logAnalyticsConfiguration: {
-        customerId: workspace.properties.customerId
-        sharedKey: listKeys(workspace.id, workspace.apiVersion).primarySharedKey
-      }
-    }
-    daprAIInstrumentationKey: appInsights.properties.InstrumentationKey
-  }
-}
+
 
 resource inputbinding1 'Microsoft.App/managedEnvironments/daprComponents@2022-01-01-preview' = {
   name: 'inputbinding1'

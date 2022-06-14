@@ -11,16 +11,16 @@ USER appuser
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0-focal AS build
 WORKDIR /src
-COPY ["DaprMvc.csproj", "./"]
-RUN dotnet restore "DaprMvc.csproj"
+COPY ["DaprQueueReadWrite.csproj", "./"]
+RUN dotnet restore "DaprQueueReadWrite.csproj"
 COPY . .
 WORKDIR "/src/."
-RUN dotnet build "DaprMvc.csproj" -c Release -o /app/build
+RUN dotnet build "DaprQueueReadWrite.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "DaprMvc.csproj" -c Release -o /app/publish
+RUN dotnet publish "DaprQueueReadWrite.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "DaprMvc.dll"]
+ENTRYPOINT ["dotnet", "DaprQueueReadWrite.dll"]

@@ -11,6 +11,7 @@ var appInsightsName = '${prefix}-app-insights'
 var serviceBusName = '${prefix}-service-bus'
 var serviceBusAuthRule = '${prefix}-service-bus-auth-rule'
 var acrName = '${prefix}acr'
+var managedIdentityName = '${prefix}-managed-identity'
 param tags object = {} 
 var storageAccountName = '${prefix}${uniqueString(resourceGroup().id)}'
 
@@ -148,9 +149,22 @@ resource servicebusauthrule 'Microsoft.ServiceBus/namespaces/AuthorizationRules@
   }
 }
 
+resource managedidentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2021-09-30-preview' = {
+  name: managedIdentityName
+  location: location
+}
 
+@description('This is the built-in acrPull role. See https://docs.microsoft.com/azure/role-based-access-control/built-in-roles#key-vault-administrator')
+resource acrPullRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope:  subscription()
+  name: '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+}
 
-
-
-
-
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(resourceGroup().id, managedIdentityName, acrPullRoleDefinition.id)
+  properties: {
+    roleDefinitionId: acrPullRoleDefinition.id
+    principalId: managedidentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}

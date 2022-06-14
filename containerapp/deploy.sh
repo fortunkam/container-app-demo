@@ -4,7 +4,7 @@
 
 RESOURCE_GROUP='container-apps-rg'
 LOCATION='westeurope'
-IMAGE_TAG='daprtest:v1.0'
+IMAGE_TAG='daprqueuereadwrite:v1.0'
 
 az group create -n $RESOURCE_GROUP --location $LOCATION
 
