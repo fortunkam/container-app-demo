@@ -5,13 +5,9 @@ This project is the culmination of a set of experiments with [DAPR](https://dapr
 It comprises of a dotnet 6 minimal API application that has the following features.
 
 * Uses DAPR to be triggered when a message arrives on a Storage Queue (Input Binding)
-* Uses DAPR to be triggered when a message arrives on a Service Bus Queue (Input Binding)
 * Uses DAPR to write to a Storage Queue (Output Binding)
 * Uses DAPR to write to a Service Bus Queue (Output Binding)
-* Uses DAPR to store some state to blob storage (State Store)
-* Uses DAPR to retrieve secrets (Secret Store)
-* Uses KEDA to scale the image based on the number of messages in the Storage Queue (for AKS)
-* Uses KEDA to scale the image based on the number of messages in the Service Bus Queue (for Container Apps)
+* Uses KEDA to scale the image based on the number of messages in the Storage Queue (for Container App)
 
 Also included are a set of scripts for deploying the solution to an [Azure Container App](https://docs.microsoft.com/en-us/azure/container-apps/).  Note: Azure container apps is currently in preview.
 
@@ -38,14 +34,10 @@ dapr run --log-level debug --app-id bindingtest --app-port 7037 --dapr-http-port
 
 (You might need to tweak the app port to match the port your dotnet app runs on for https)
 
-## Running in AKS
-
-See the [./kubernetes/deploy.md](./kubernetes/deploy.md) for details on deploying the sample on AKS.
-
 
 ## Running in Azure Container Apps
 
-See the [./containerapp/deploy.md](./containerapp/deploy.md) for details on deploying the sample to Azure Container Apps.
+See the [./script/script.md](./script/script.md) for details on demoing these samples with Azure Container Apps.
 
 (This example was put together in collaboration with Chris Reddington and you can find a similar example at his repo [https://github.com/chrisreddington/DaprExample](https://github.com/chrisreddington/DaprExample) )
 
